@@ -16,6 +16,17 @@ class Folder {
     this.remark = map["remark"];
     this.name = map["name"];
   }
+
+  Map<String, dynamic> toMap() {
+    var map = new Map<String, dynamic>();
+    map["id"] = this.id;
+    map["created"] = this.created;
+    map["color"] = this.color.value;
+    map["remark"] = this.remark;
+    map["name"] = this.name;
+
+    return map;
+  }
 }
 
 class Activity {
@@ -35,7 +46,19 @@ class Activity {
     this.color = Color(map["color"]);
     this.remark = map["remark"];
     this.name = map["name"];
-    this.folder = Folder.fromMap(map["folder"]);
+    this.folder = map["folder"];
+  }
+
+  Map<String, dynamic> toMap() {
+    var map = new Map<String, dynamic>();
+    map["id"] = this.id;
+    map["created"] = this.created;
+    map["color"] = this.color.value;
+    map["remark"] = this.remark;
+    map["name"] = this.name;
+    map["folder"] = this.folder.id;
+
+    return map;
   }
 }
 
@@ -59,11 +82,24 @@ class Record {
 
   Record.fromMap(Map<String, dynamic> map) {
     this.id = map["id"];
-    this.activity = Activity.fromMap(map["activity"]);
+    this.activity = map["activity"];
     this.st = map["st"];
     this.ed = map["ed"];
     this.duration = map["duration"];
     this.status = map["status"];
     this.text = map["text"];
+  }
+
+  Map<String, dynamic> toMap() {
+    var map = new Map<String, dynamic>();
+    map["id"] = this.id;
+    map["activity"] = this.activity.id;
+    map["st"] = this.st;
+    map["ed"] = this.ed;
+    map["duration"] = this.duration;
+    map["status"] = this.status;
+    map["text"] = this.text;
+
+    return map;
   }
 }

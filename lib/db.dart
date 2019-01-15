@@ -1,42 +1,40 @@
 import 'package:path/path.dart';
 import "package:sqflite/sqflite.dart";
+import "components/DataClass.dart";
 
 Database db;
+String activityTable = "ACTIVITY";
+String folderTable = "FOLDER";
+String recordTable = "RECORD";
 
 Future initDB() async {
   var dbPath = await getDatabasesPath();
   dbPath = join(dbPath, 'app.db');
 
-  db = await openDatabase(dbPath, version: 1, onCreate: (db, version) async {
+  db = await openDatabase(dbPath, version: 1, onCreate: (_db, version) async {
     print("Prepare to init DB.");
-    await db.execute("""
-      PRAGMA foreign_keys = off;
-      BEGIN TRANSACTION;
-
-      -- 表：ACTIVITY
+    await _db.execute("""
       CREATE TABLE ACTIVITY (
           id      INTEGER PRIMARY KEY AUTOINCREMENT
                           NOT NULL,
           folder          REFERENCES FOLDER (id),
-          color   CHAR,
+          color   INTEGER,
           remark  CHAR,
           created INTEGER,
           name    CHAR    NOT NULL
       );
-
-
-      -- 表：FOLDER
+      """);
+    await _db.execute("""
       CREATE TABLE FOLDER (
           id      INTEGER PRIMARY KEY AUTOINCREMENT
                           NOT NULL,
           created INTEGER NOT NULL,
-          color   CHAR,
+          color   INTEGER,
           remark  CHAR,
           name    CHAR    NOT NULL
       );
-
-
-      -- 表：RECORD
+      """);
+    await _db.execute("""
       CREATE TABLE RECORD (
           id       INTEGER PRIMARY KEY AUTOINCREMENT,
           activity         REFERENCES ACTIVITY (id),
@@ -47,12 +45,82 @@ Future initDB() async {
           text     CHAR,
           duration INTEGER
       );
-
-
-      COMMIT TRANSACTION;
-      PRAGMA foreign_keys = on;
-
       """);
     print("Init Database Done!");
   });
+}
+
+Future<List<Folder>> getFoldersOf({List ids}) async {
+  var result = [];
+  print(ids);
+  if (ids != null && ids.length > 0) {
+    String args = List.filled(ids.length, "?").join(",");
+    result =
+        await db.query(folderTable, where: "id in ($args)", whereArgs: ids);
+  } else {
+    result = await db.query(folderTable);
+  }
+  return result.map((v) => Folder.fromMap(v)).toList();
+}
+
+Future insertFolder(Folder f) async {
+  f.id = await db.insert(folderTable, f.toMap());
+  return f;
+}
+
+Future updateFolder(Folder f) async {
+  f.id = await db.update(folderTable, f.toMap());
+  return f;
+}
+
+Future<List<Activity>> getActivitiesOf({List ids}) async {
+  var result = [];
+  if (ids != null && ids.length > 0) {
+    String args = List.filled(ids.length, "?").join(",");
+    result =
+        await db.query(activityTable, where: "id in ($args)", whereArgs: ids);
+  } else {
+    result = await db.query(activityTable);
+  }
+  // Convert query result to mutable map.
+  var _res = result.map((v) => Map<String, dynamic>.from(v)).toList();
+  // Get id of folders.
+  List folderIds = _res.map((v) => v["folder"]).toList();
+  // Query folders.
+  List<Folder> folders = await getFoldersOf(ids: folderIds);
+  // Index foldres.
+  Map indexFolder =
+      Map.fromIterable(folders, key: (v) => v.id, value: (v) => v);
+  // Replace folder id in activities with folder map.
+  for (int i = 0; i < _res.length; i++) {
+    _res[i]["folder"] = indexFolder[_res[i]["folder"]];
+  }
+
+  List acitivities = _res.map((v) => Activity.fromMap(v)).toList();
+  return acitivities;
+}
+
+Future insertActivity(Activity a) async {
+  a.id = await db.insert(activityTable, a.toMap());
+  return a;
+}
+
+Future updateActivity(Activity a) async {
+  a.id = await db.update(activityTable, a.toMap());
+  return a;
+}
+
+Future<List<Record>> getAllRecords() async {
+  var result = await db.query(recordTable);
+  return result.map((v) => Record.fromMap(v)).toList();
+}
+
+Future insertRecord(Record r) async {
+  r.id = await db.insert(recordTable, r.toMap());
+  return r;
+}
+
+Future updateRecord(Record r) async {
+  r.id = await db.update(recordTable, r.toMap());
+  return r;
 }

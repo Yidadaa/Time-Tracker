@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'components/BarPainter.dart';
+import 'db.dart';
+import 'components/DataClass.dart';
 
 void main() => runApp(new MyApp());
 
@@ -35,6 +37,35 @@ class _MyHomePageState extends State<MyHomePage> {
     new BarData(0.53, 0.6, Colors.red),
     new BarData(0.63, 0.9, Colors.redAccent)
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    initDB();
+  }
+
+  void testDB() async {
+    print("Test FolderTable");
+    var testFolder = new Folder(
+        created: new DateTime.now().microsecondsSinceEpoch,
+        color: Colors.green,
+        remark: "ss",
+        name: "test");
+    await insertFolder(testFolder);
+    var res = await getFoldersOf();
+    res.forEach((v) => print(v.toMap()));
+
+    print("Test ActivityTable");
+
+    await insertActivity(new Activity(
+        created: new DateTime.now().microsecondsSinceEpoch,
+        color: Colors.grey,
+        remark: "test",
+        name: "hello",
+        folder: testFolder));
+    var aRes = await getActivitiesOf();
+    aRes.forEach((v) => print(v.toMap()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +138,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
-          onPressed: () {},
+          onPressed: () {
+            testDB();
+          },
         ),
         body: ListView(
           padding: new EdgeInsets.all(20.0),
