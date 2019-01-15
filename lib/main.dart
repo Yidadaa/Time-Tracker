@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'components/BarPainter.dart';
 
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -28,6 +28,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String title = "上午好";
   final _theKey = GlobalKey<ScaffoldState>();
+  final testData = [
+    new BarData(0.1, 0.2, Colors.grey),
+    new BarData(0.2, 0.4, Colors.green),
+    new BarData(0.43, 0.5, Colors.blue),
+    new BarData(0.53, 0.6, Colors.red),
+    new BarData(0.63, 0.9, Colors.redAccent)
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -139,11 +146,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Text("2019/01/12")
                                 ],
                               ),
-                              Container(
-                                height: 12.0,
-                                color: Colors.grey,
-                                margin: new EdgeInsets.only(
-                                    top: 20.0, bottom: 20.0),
+                              SizedBox(
+                                width: double.infinity,
+                                child: Container(
+                                  color: Colors.grey,
+                                  margin: new EdgeInsets.only(
+                                      top: 20.0, bottom: 20.0),
+                                  child: CustomPaint(
+                                    foregroundPainter:
+                                        BarPainter(12.0, Colors.grey, testData),
+                                  ),
+                                ),
                               ),
                               Row(
                                 mainAxisAlignment:
