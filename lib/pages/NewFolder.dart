@@ -89,7 +89,7 @@ class _NewFolderPageState extends State<NewFolderPage> {
               padding: EdgeInsets.all(20.0),
               child: TextField(
                 controller: remarkController,
-                style: TextStyle(color: Colors.black87),
+                style: TextStyle(color: Colors.black87, fontSize: 18.0),
                 maxLines: null,
                 decoration: InputDecoration(
                     hintText: "描述",

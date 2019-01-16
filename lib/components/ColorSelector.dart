@@ -28,31 +28,32 @@ class _ColorSelectorState extends State<ColorSelector> {
       child: SingleChildScrollView(
         child: Row(
           children: colors
-              .map((v) => Container(
-                  height: 30.0,
-                  width: 30.0,
-                  margin: EdgeInsets.only(right: 10.0),
-                  child: ButtonTheme(
-                    padding: EdgeInsets.all(0.0),
-                    child: RaisedButton(
-                      onPressed: () {
+              .map((v) => Padding(
+                    padding: EdgeInsets.only(right: 10.0),
+                    child: InkWell(
+                      onTap: () {
                         this.onChange(v);
                         setState(() {
                           selectedColor = v;
                         });
                       },
-                      child: Icon(
-                        Icons.check,
-                        color: selectedColor.value == v.value
-                            ? Colors.white
-                            : Colors.transparent,
-                        size: 20.0,
-                      ),
-                      color: v,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100.0)),
+                      child: Container(
+                          height: 30.0,
+                          width: 30.0,
+                          child: ButtonTheme(
+                              padding: EdgeInsets.all(0.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(100.0),
+                                    color: v),
+                                child: Center(
+                                    child: Icon(Icons.check,
+                                        color: v.value == selectedColor.value
+                                            ? Colors.white
+                                            : Colors.transparent)),
+                              ))),
                     ),
-                  )))
+                  ))
               .toList(),
         ),
       ),
