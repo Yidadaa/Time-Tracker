@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import "package:sqflite/sqflite.dart";
-import "components/DataClass.dart";
+import "../components/DataClass.dart";
 
 Database db;
 String activityTable = "ACTIVITY";
@@ -52,7 +52,6 @@ Future initDB() async {
 
 Future<List<Folder>> getFoldersOf({List ids}) async {
   var result = [];
-  print(ids);
   if (ids != null && ids.length > 0) {
     String args = List.filled(ids.length, "?").join(",");
     result =
@@ -110,9 +109,35 @@ Future updateActivity(Activity a) async {
   return a;
 }
 
+// Records CURD Function
+
+// Turn activity fielld of query records to activity class.
+Future<List> getActivitiesOfRecords(List rawRecords) async {
+  // Same as getActivitiesOf
+  var _res = rawRecords.map((v) => Map<String, dynamic>.from(v)).toList();
+  List activityIds = _res.map((v) => v["activity"]).toList();
+  List<Activity> activities = await getActivitiesOf(ids: activityIds);
+  Map indexActivity =
+      Map.fromIterable(activities, key: (v) => v.id, value: (v) => v);
+  for (int i = 0; i < _res.length; i++) {
+    _res[i]["activity"] = indexActivity[_res[i]["activity"]];
+  }
+  return _res;
+}
+
+// Get all record items.
 Future<List<Record>> getAllRecords() async {
   var result = await db.query(recordTable);
-  return result.map((v) => Record.fromMap(v)).toList();
+  var _res = await getActivitiesOfRecords(result);
+  return _res.map((v) => Record.fromMap(v)).toList();
+}
+
+// Get records between date.
+Future<List<Record>> getRecordsBetween(int from, int to) async {
+  var result = await db
+      .query(recordTable, where: "st > ? and ed < ?", whereArgs: [from, to]);
+  var _res = await getActivitiesOfRecords(result);
+  return _res.map((v) => Record.fromMap(v)).toList();
 }
 
 Future insertRecord(Record r) async {
